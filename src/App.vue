@@ -17,7 +17,15 @@ const paciente = reactive({
 });
 
 const guardarPaciente = () => {
-	pacientes.value.push({ ...paciente, id: uid() });
+	if (paciente.id) {
+		const { id } = paciente;
+		const i = pacientes.value.findIndex(
+			(pacienteState) => pacienteState.id === id
+		);
+		pacientes.value[i] = { ...paciente };
+	} else {
+		pacientes.value.push({ ...paciente, id: uid() });
+	}
 
 	// Reiniciar el objeto
 	Object.assign(paciente, {
@@ -26,6 +34,7 @@ const guardarPaciente = () => {
 		email: "",
 		alta: "",
 		sintomas: "",
+		id: null,
 	});
 };
 
@@ -34,6 +43,10 @@ const actualizarPaciente = (id) => {
 		(paciente) => paciente.id === id
 	)[0];
 	Object.assign(paciente, pacienteEditar);
+};
+
+const eliminarPaciente = (id) => {
+	pacientes.value = pacientes.value.filter((paciente) => paciente.id !== id);
 };
 </script>
 
@@ -48,6 +61,7 @@ const actualizarPaciente = (id) => {
 				v-model:alta="paciente.alta"
 				v-model:sintomas="paciente.sintomas"
 				@guardar-paciente="guardarPaciente"
+				:id="paciente.id"
 			/>
 			<div class="md:w-1/2 md:h-screen overflow-y-scroll">
 				<h3 class="font-black text-3xl text-center">
@@ -64,6 +78,7 @@ const actualizarPaciente = (id) => {
 						v-for="paciente in pacientes"
 						:paciente="paciente"
 						@actualizar-paciente="actualizarPaciente"
+						@eliminar-paciente="eliminarPaciente"
 					/>
 				</div>
 				<p v-else class="mt-20 t-2xl text-center">No hay pacientes</p>
